@@ -2,9 +2,9 @@ Compilation:
 1. This assignment is completed on the CS484 Virtual Machine.
 
 2. Run the program by : 
-premake4 gmake
-make
-/A5 Asset/filename.lua
+premake4 gmake \
+make \
+/A5 Asset/filename.lua \
 
 Demo:
 
