@@ -1,3 +1,5 @@
+A raytracing framework written in C++, implemented relection; refraction; texture mapping; mesh model; 360 background.
+
 Compilation:
 1. This assignment is completed on the CS484 Virtual Machine.
 
