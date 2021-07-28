@@ -4,11 +4,10 @@ Compilation:
 2. Run the program by : 
 premake4 gmake
 make
-/A4 Asset/simple.lua
+/A5 Asset/filename.lua
 
-Manual:
-1. I had some problem with hierarchical model so that simple-cow and macho-cow are not rendered, so I used hier and nonhier instead.
-2. Other objectives are complete; bounding box and sample images are rendered.
-3. Additional feature implemented is reflective surface. An additional parameter is added to gr.material at the end as the reflectivity.
-4. Sample image is a beautiful sunset demonstrating the mirror surfaces.
+Demo:
 
+<img src="https://github.com/DaveHJT/RayTracing-Project/blob/main/render/frame0057.png?raw=true" width="800">
+<img src="https://github.com/DaveHJT/RayTracing-Project/blob/main/render/records/refraction%20test%201.6.png?raw=true" width="800">
+<img src="https://github.com/DaveHJT/RayTracing-Project/blob/main/render/records/frame0000.png?raw=true" width="800">
