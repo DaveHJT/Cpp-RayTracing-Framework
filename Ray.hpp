@@ -6,9 +6,11 @@ using namespace glm;
 class Ray {
 public:
   Ray(vec3 source, vec3 direction) : source(source), direction(direction) {}
+  Ray(vec3 source, vec3 direction, float time) : source(source), direction(direction), time(time) {}
   Ray() {}
   vec3 source = vec3();
   vec3 direction = vec3();
+  float time = 0;
 };
 
 class Intersection {

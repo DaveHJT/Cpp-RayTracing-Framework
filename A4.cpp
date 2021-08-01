@@ -5,7 +5,7 @@
 #include "A4.hpp"
 #include "GeometryNode.hpp"
 #include "cs488-framework/MathUtils.hpp"
-
+#include <vector>
 // #define FAST_MODE
 
 using namespace glm;
@@ -15,23 +15,20 @@ float AIR_REFRACTIVE_IDX = 1.0f;
 float GLASS_REFRACTIVE_IDX = 1.4f;
 float WATER_REFRACTIVE_IDX = 1.3f;
 
-int duration = 15;
+int duration = 5;
 int fps = 24;
-int sample = 3;
+int sample = 18;
 int state = 0;
-int maxHitTimes = 3;
+int maxHitTimes = 2;
 
-float d[] = {1.0f, 2.0f, 5.0f, 5.0f};
+float d[] = {10.0f, 2.0f, 5.0f, 5.0f};
 float lastTime = 0;
-vec3 redDir = vec3();
-vec3 blueDir = vec3();
-vec3 glassDir = normalize(vec3(-1, 0, 1.1));
+float radius = 80.0f;
 
-bool hit1 = false;
-bool hit2 = false;
-float velocityRatio1 = 0;
-float velocityRatio2 = 0;
-float initialVelocity = 700.0f;
+float aperture = 15.0f;
+
+string ballNames[] = {"redball", "blueball", "metalball", "glassball"};
+vector<GeometryNode*> ballNodes;
 
 static vec3 backgroundColorRB = vec3(0.45f, 0.28f, 0.60f);
 static vec3 backgroundColorLU = vec3(0.09f, 0.42f, 0.75f);
@@ -69,6 +66,7 @@ vec3 getBackgroundColor(vec3 bgrDir, Image *backgroundImage) {
 }
 
 vec3 rayTrace(Ray &ray, SceneNode *root, Image *backgroundImage, vec3 ambient, const list<Light *> lights, int maxHit, bool refracted = false) {
+	// if (ray.time != 0) cout << " time2: " << ray.time << endl;
 	Intersection inter = root->intersect(ray);
 	vec3 backgroundColor = getBackgroundColor(ray.direction, backgroundImage);
 	vec3 color = backgroundColor;
@@ -91,7 +89,7 @@ vec3 rayTrace(Ray &ray, SceneNode *root, Image *backgroundImage, vec3 ambient, c
 			// shadow ray
 			vec3 lightDir = normalize(light->position - inter.position);
 
-		  Ray shadowRay = Ray(inter.position, lightDir);
+		  Ray shadowRay = Ray(inter.position, lightDir, ray.time);
 			Intersection shadowInter = root->intersect(shadowRay);
 		//	std::cout << "shadowInter.hit" << shadowInter.hit << '\n';
 			if (!shadowInter.hit) {
@@ -196,78 +194,18 @@ void updateMovement(SceneNode * root, int frame, glm::vec3 & eye, glm::vec3 & vi
 	float frameFactor = fps * d[state];
   // 	cout << "frame: " << frame << " lastTime: " << lastTime << " state: " << state << " hit " << hit1 << " hit2 " << hit2 << endl;
 	if (state == 0) {
-		view = transformVec(translate(vec3(0, -1, 0) * 600.0f / frameFactor), view);
-
-	} else if (state == 1) {
-		eye = transformVec(translate(vec3(-3, -2.5, 0) * 300.0f / frameFactor), eye);
-		view = transformVec(translate(vec3(0, 1, 0) * 200.0f / frameFactor), view);
-	} else if (state == 2) {
-		eye = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), eye);
-		view = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), view);
-		GeometryNode *glassballNode = static_cast<GeometryNode*>(getNode(*root, "glassball"));
-		GeometryNode *redballNode = static_cast<GeometryNode*>(getNode(*root, "redball"));
-		NonhierSphere *glassball = static_cast<NonhierSphere*>(glassballNode->m_primitive);
-		NonhierSphere *redball = static_cast<NonhierSphere*>(redballNode->m_primitive);
-		if (!hit1) {
-			if (glassballNode != nullptr && redballNode != nullptr) {
-				glassballNode->translate(glassDir * initialVelocity / frameFactor);
-
-				vec3 redPos = vec3(redballNode->trans * vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				vec3 glassPos = vec3(glassballNode->trans * vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				float radiusSum = redball->m_radius + glassball->m_radius;
-				// cout << "dist " << distance(redPos, glassPos) << " radiusSum " << radiusSum << endl;
-				if (distance(redPos, glassPos) <= radiusSum) {
-					hit1 = true;
-					vec3 n = normalize(glassPos - redPos);
-					glassDir = normalize(glassDir - 2 * n * dot(glassDir, n));
-					redDir = -n;
-					velocityRatio1 = 1 - abs(sin(dot(glassDir, n)));
-					cout << "vr1 " << velocityRatio1 << endl;
-					cout << "glassDir " << to_string(glassDir) << endl;
-					lastTime = 1000;
-				}
-			}
-		} else {
-				glassballNode->translate(glassDir * initialVelocity * velocityRatio1 / frameFactor);
-				vec3 shift = redDir * initialVelocity * (1 - velocityRatio1) / frameFactor;
-				redballNode->translate(shift);
-				// float rotateSpd = sqrt(dot(shift, shift)) / redball->m_radius;
-				redballNode->rotate('z', (float) radiansToDegrees(-shift.x / redball->m_radius));
-				redballNode->rotate('x', (float) radiansToDegrees(shift.z / redball->m_radius));
-				cout << "glass translate " << to_string(glassDir * initialVelocity * velocityRatio1 / frameFactor) << endl;
-				cout << " shiftx: " << shift.x << " shiftz: " << shift.z << endl;
-				GeometryNode *blueballNode = static_cast<GeometryNode*>(getNode(*root, "blueball"));
-				NonhierSphere *blueball = static_cast<NonhierSphere*>(blueballNode->m_primitive);
-				vec3 bluePos = vec3(blueballNode->trans * vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				vec3 redPos = vec3(redballNode->trans * vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				float radiusSum = blueball->m_radius + glassball->m_radius;
-				if (distance(bluePos, redPos) <= radiusSum) {
-					hit2 = true;
-					vec3 n = normalize(redPos - bluePos);
-					redDir = normalize(redDir - 2 * n * dot(redDir, n));
-					blueDir = -n;
-					velocityRatio2 = 1 - abs(sin(dot(redDir, n)));
-					cout << "redDir " << to_string(redDir) << endl;
-					cout << "blueDir " << to_string(blueDir) << endl;
-					cout << "vr2 " << velocityRatio2 << endl;
-					state++;
-
-				}
-		}
-	} else if (state == 3) {
-		eye = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), eye);
-		view = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), view);
-		GeometryNode *redballNode = static_cast<GeometryNode*>(getNode(*root, "redball"));
-		NonhierSphere *redball = static_cast<NonhierSphere*>(redballNode->m_primitive);
-		GeometryNode *blueballNode = static_cast<GeometryNode*>(getNode(*root, "blueball"));
-		NonhierSphere *blueball = static_cast<NonhierSphere*>(blueballNode->m_primitive);
-		redballNode->translate(redDir * initialVelocity * velocityRatio1 * velocityRatio2 / frameFactor);
-		vec3 shift = blueDir * initialVelocity * velocityRatio1 * (1 - velocityRatio2) / frameFactor;
-		blueballNode->translate(shift);
-		cout << " shiftx: " << shift.x << " shiftz: " << shift.z << endl;
-		blueballNode->rotate('z', (float) radiansToDegrees(-shift.x / blueball->m_radius));
-		blueballNode->rotate('x', (float) radiansToDegrees(shift.z / blueball->m_radius));
+		view = transformVec(translate(vec3(-1, 0, 0) * 400.0f / frameFactor), view);
 	}
+	// else if (state == 1) {
+	// 	eye = transformVec(translate(vec3(-3, -2.5, 0) * 300.0f / frameFactor), eye);
+	// 	view = transformVec(translate(vec3(0, 1, 0) * 200.0f / frameFactor), view);
+	// } else if (state == 2) {
+	// 	eye = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), eye);
+	// 	view = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), view);
+	// } else if (state == 3) {
+	// 	eye = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), eye);
+	// 	view = transformVec(translate(vec3(-1, 0, 0) * 350.0f / frameFactor), view);
+	// }
 
 	if (frame / fps - lastTime >= d[state]) {
 
@@ -275,25 +213,46 @@ void updateMovement(SceneNode * root, int frame, glm::vec3 & eye, glm::vec3 & vi
 		state++;
 
 	}
-	// SceneNode *redball = getNode(*root, "redball");
-	// SceneNode *blueball = getNode(*root, "blueball");
-	// SceneNode *lens = getNode(*root, "lens");
-	//
-	// if (redball != nullptr && blueball != nullptr) {
-	// 	redball->rotate('y', -3.0f / fps);
-	// 	redball->rotate('x', -3.0f / fps);
-	// 	// redball->translate(vec3(-10, 0, -10) / fps);
-	// 	// redball->translate(vec3(0, 20, 0));
-	// 	// blueball->translate(vec3(0, 20, 0));
-	//
-	// 	// blueball->rotate('y', 3.0f);
-	// 	// blueball->rotate('x', 3.0f);
-	// }
-	// if (lens != nullptr) {
-	// 	lens->translate(vec3(-3, 0, 0) / fps);
-	// }
 
-	// cout << to_string(view) << endl;
+	// check collision
+	for (int i = 0; i < ballNodes.size(); i++) {
+		for (int j = i + 1; j < ballNodes.size(); j++) {
+			vec3 iPos = vec3(ballNodes[i]->trans * vec4(0.0f, 0.0f, 0.0f, 1.0f));
+			vec3 jPos = vec3(ballNodes[j]->trans * vec4(0.0f, 0.0f, 0.0f, 1.0f));
+			if (distance(iPos, jPos) < 2 * radius) {
+				GeometryNode *balli = ballNodes[i];
+				GeometryNode *ballj = ballNodes[j];
+				if (balli->velocity == vec3(0)) swap(balli ,ballj);
+				vec3 n = normalize(iPos - jPos);
+				vec3 iDir = normalize(balli->velocity);
+				float viRatio = cos(dot(iDir, n));
+				float vjRatio = sin(dot(iDir, n));
+				// cout << "n " << to_string(n) << endl;
+				// cout << "ballNodes[i]->velocity " << to_string(ballNodes[i]->velocity) << endl;
+				// cout << "iDir " << to_string(iDir) << endl;
+				// cout << "dot(iDir, n) " << dot(iDir, n) << endl;
+				// cout << ballNodes[i]->m_name << viRatio << endl;
+				// cout << ballNodes[j]->m_name << vjRatio << endl;
+				vec3 jDir = n;
+				ballj->velocity = jDir * distance(balli->velocity, vec3(0)) * vjRatio;
+				// iDir = normalize(iDir + (PI / 2 - dot(iDir, n)));
+				balli->velocity = balli->velocity - ballj->velocity;
+
+				// balli->velocity = iDir * balli->velocity * viRatio;
+
+
+				// cout << ballNodes[j]->m_name << to_string(ballNodes[j]->velocity) << endl;
+			}
+		}
+	}
+
+	// move by velocity
+	for (int i = 0; i < ballNodes.size(); i++) {
+		cout << ballNodes[i]->m_name << to_string(ballNodes[i]->velocity) << endl;
+		ballNodes[i]->translate(ballNodes[i]->velocity);
+		ballNodes[i]->rotate('z', (float) radiansToDegrees(-ballNodes[i]->velocity.x / radius));
+		ballNodes[i]->rotate('x', (float) radiansToDegrees(ballNodes[i]->velocity.z /radius));
+	}
 }
 
 void transTree(SceneNode *root) {
@@ -302,6 +261,19 @@ void transTree(SceneNode *root) {
 		child->invtrans = inverse(child->trans);
 		transTree(child);
 	}
+}
+
+double random(double start,double end)
+{
+ return start + (end - start) * rand() / (RAND_MAX + 1.0f);
+}
+
+inline vec3 getRandomInDisk() {
+    vec3 pos;
+    do {
+        pos = vec3(random(-1,1), random(-1,1), 0);
+    } while (dot(pos ,pos) >= 1.0f);
+    return pos;
 }
 
 void A4_Render(
@@ -322,7 +294,12 @@ void A4_Render(
 		const std::list<Light *> & lights
 ) {
 
-  // Fill in raytracing code here...
+  for (string name : ballNames) {
+		ballNodes.push_back(static_cast<GeometryNode*>(getNode(*root, name)));
+		if (ballNodes.back()->m_name == "glassball") ballNodes.back()->velocity = vec3(-400, 0, 0) / fps;
+		// if (ballNodes.back()->m_name == "redball") ballNodes.back()->velocity = vec3(0, 0, -400) / fps;
+		// if (ballNodes.back()->m_name == "lens") ballNodes.back()->velocity = vec3(30, 0, 0) / fps;
+	}
 
   std::cout << "F20: Calling A4_Render(\n" <<
 		  "\t" << *root <<
@@ -366,38 +343,24 @@ void A4_Render(
 	string path =  "render/frame";
 	string suffix =  ".png";
 	for (uint frame = 0; frame < nofFrames; frame++) {
-		float d = distance(eye, view);
-		mat4 T1 = translate(mat4(1), vec3((float)-nx/2, (float)-ny/2, d));
-		float height = 2 * d * tan(radians(fovy/2));
-		// cout << "height: " << height << endl;
+		float lensRadius = aperture / 2.0f;
+		float focus = distance(eye, view);
+		// cout << "focus " << focus << endl;
+		float height = 2.0f * tan(radians(fovy) / 2.0f);
+		// cout << "height " << height << endl;
 		float width = nx/ny * height;
 
-		// cout << "ny: " << ny << endl;
-		// cout << "d: " << d << endl;
-		mat4 S2 = scale(mat4(1), vec3(-height/ny, -width/nx, 1.0f));
-		vec3 w = normalize(view - eye);
+		vec3 w = normalize(eye - view);
 		vec3 u = normalize(cross(up, w));
 		vec3 v = cross(w, u);
 
-		mat4 R3 = mat4{
-			vec4(u, 0.0f),
-			vec4(v, 0.0f),
-			vec4(w, 0.0f),
-			vec4(0.0f, 0.0f, 0.0f, 1.0f)
-		};
 
-		mat4 T4 = mat4(1);
-		T4 = mat4{
-			vec4(1.0f, 0.0f, 0.0f, 0.0f),
-			vec4(0.0f, 1.0f, 0.0f, 0.0f),
-			vec4(0.0f, 0.0f, 1.0f, 0.0f),
-			vec4(eye, 1.0f)
-		};
-
-
-		mat4 pworld = T4 * R3 * S2 * T1;
-
-		vec4 lookFrom = vec4(eye, 1.0f);
+		vec3 horizontal = width * focus * u;
+		// cout << "horizontal " << to_string(horizontal) << endl;
+		vec3 vertical = height * focus * v;
+		// cout << "vertical " << to_string(vertical) << endl;
+		vec3 corner = eye - (horizontal / 2) - (vertical / 2) - focus * w;
+		// cout << "corner " << to_string(corner) << endl;
 		if (frame - loading > nofFrames / 10) {
 			std::cout << "█ " << (double) loading / nofFrames * 100 << "%" << endl;
 			loading = frame;
@@ -411,38 +374,33 @@ void A4_Render(
 				Ray ray = Ray();
 				vec3 color = vec3(0);
 				 // cout << "calculation" << endl;
-				 ray.source = eye;
+
+				 // cout << "ray.source " << to_string(ray.source) << endl;
+
 				 for(float i = 0; i < sample; i++){
-	 				for(float j = 0; j < sample; j++){
-						ray.direction = vec3(normalize(pworld * vec4((float)x + rand() % 100 / 50 - 1.2f, (float)y + rand() % 100 / 50 - 1.2f, 0.0f, 1.0f) - lookFrom));
+					 vec3 random = lensRadius * getRandomInDisk();
+					//  cout << "lensRadius " << lensRadius << endl;
+					 // cout << "getRandomInDisk " << to_string(getRandomInDisk()) << endl;
+					 // cout << "random " << to_string(random) << endl;
+					 vec3 offset = u * random.x + v * random.y;
+					 ray.source = eye + offset;
+						ray.time = rand() % 100 / 100.0f;
+						// cout << " time1: " << ray.time << endl;
+						ray.direction = normalize(corner + (float) x / nx * horizontal + (float) y / ny * vertical - ray.source);
+						// cout << "direction " << to_string(ray.direction) << endl;
+
 	 					color += rayTrace(ray, root, backgroundImage, ambient, lights, maxHitTimes);
-	 				}
-	 			}
-				color /= (float) pow(sample, 2);
+		 			}
+					color /= (float) sample;
 
-
-				// cout << "screen " << to_string(pworld * vec4((float)x, (float)y, 0.0f, 1.0f)) << endl;
-				// cout << "lookfrom " << to_string(lookFrom) << endl;
-				// cout << lookFrom.x <<lookFrom.y << lookFrom.z<< endl;
-				// cout << ray.direction.x <<ray.direction.y << ray.direction.z<< endl;
-				//  cout << "1" << endl;
-				// vec3 backgroundColor = ((float)x / nx + y / ny) / 2 * backgroundColorRB + ((float)(nx - x - 1) / nx + (ny - y - 1) / ny) / 2 * backgroundColorLU;
-				// int distX = std::min(x, nx - x);
-				// int distY = std::min(y, ny - y);
-				// //  cout << "2" << endl;
-				// float ratio = (float) ((distX * 2 * distY * 2) + (nx * ny)) / (2 * nx * ny);
-				// //  cout << x << " " << y << " " << ratio << endl;
-				//  // cout << "ratio" << ratio << endl;
-				// if ((int)(500.0f * (1.0f - ratio)) != 0 && rand() % (int) (500 * (1 - ratio)) == 1) backgroundColor = ratio * backgroundStar;
-				// cout << "raytracing" << endl;
-
-
-				// Red:
-				im(x, y, 0) = color.x;
-				// Green:
-				im(x, y, 1) = color.y;
-				// Blue:
-				im(x, y, 2) = color.z;
+					// flip
+					y = ny - y - 1;
+					// Red:
+					im(x, y, 0) = color.x;
+					// Green:
+					im(x, y, 1) = color.y;
+					// Blue:
+					im(x, y, 2) = color.z;
 			}
 		}
 		string index = "";

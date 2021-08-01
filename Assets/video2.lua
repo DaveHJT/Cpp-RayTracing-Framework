@@ -72,6 +72,6 @@ yellow_light3 = gr.light({-600.0, 550.0, 600.0}, {1.0, 0.84, 0.7}, {0, -1, 0})
 yellow_light4 = gr.light({600.0, 550.0, -600.0}, {1.0, 0.84, 0.7}, {0, -1, 0})
 
 
-gr.render(scene_root, 'sample.png', 1080, 1080,
+gr.render(scene_root, 'sample.png', 300, 300,
 	  {1800, 800, 0}, {0, 800, 0}, {0, 1, 0}, 100,
 	  {0.3, 0.3, 0.3}, {white_light, yellow_light, yellow_light2, yellow_light3, yellow_light4})

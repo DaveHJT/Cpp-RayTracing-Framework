@@ -15,4 +15,5 @@ public:
 	Intersection intersect(Ray ray);
 	Material *m_material;
 	Primitive *m_primitive;
+	vec3 velocity;
 };

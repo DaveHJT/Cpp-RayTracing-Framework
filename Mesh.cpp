@@ -54,7 +54,6 @@ float ratio(float a, float b) {
 
 Intersection Mesh::intersect(Ray ray) {
 	// Intersection interBV = boundingV->intersect(ray);
-	//
 	// if (!interBV.hit) return Intersection();
 	// cout << *this << endl;
 	vector<vec3> vertices = m_vertices;
@@ -167,7 +166,7 @@ Mesh::Mesh( const string& fname )
 	vec3 pos = (max + min / 2);
 	float radius = distance(max, pos) > distance(min, pos) ? distance(max, pos) : distance(min, pos);
 
-	mat = new PhongMaterial(vec3(0.9, 0.9, 0.9), vec3(0.9, 0.9, 0.9), 100, 0.0, 1.0, "");
+	mat = new PhongMaterial(vec3(0.9, 0.9, 0.9), vec3(0.9, 0.9, 0.9), 100, 1.0, 0, "");
 	boundingV = new NonhierSphere(pos, radius);
 
 	// cout << "mesh: " << fname << *this << endl;

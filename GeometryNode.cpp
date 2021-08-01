@@ -14,6 +14,7 @@ GeometryNode::GeometryNode(
 	: SceneNode( name )
 	, m_material( mat )
 	, m_primitive( prim )
+	, velocity( vec3(0) )
 {
 	m_nodeType = NodeType::GeometryNode;
 	cout << "GeometryNode: " << name << endl;
@@ -80,8 +81,14 @@ void GeometryNode::applyTrans(mat4 transform) {
 // }
 
 Intersection GeometryNode::intersect(Ray ray) {
-	Ray transRay;
+	// motion blur
+	vec3 offset = ray.time * velocity;
+	ray.source -= offset;
+	// if (offset != vec3(0)) cout << m_name << " " << to_string(offset) << endl;
+	// if (ray.time != 0) cout << m_name << " time: " << ray.time << endl;
 
+	Ray transRay;
+  transRay.time = ray.time;
 	transRay.source = transferVec(invtrans, ray.source);
 	transRay.direction = normalize(transferVec(invtrans, ray.source + ray.direction) - transferVec(invtrans, ray.source));
 	// cout << m_name << " "  << this->children.size() << " ";
