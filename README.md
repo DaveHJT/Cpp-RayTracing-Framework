@@ -1,6 +1,10 @@
 # RayTracing-Project
 A raytracing framework is written in C++, implemented reflection; refraction; texture mapping; mesh model; 360 background; motion blur, defocus blur (depth of field).
 
+## Video Demo:
+
+The full video demo is [here](https://github.com/DaveHJT/RayTracing-Project/blob/main/demo%20video.mp4).
+
 ## Document:
 Please see the [document](https://github.com/DaveHJT/RayTracing-Project/blob/main/document.pdf) for details.
 
@@ -15,9 +19,6 @@ make
 ## Manual:
 1. This program is based on the A4 framework so it runs the same as A4. After activation, the frames are generated in ./render folder.
 
-## Demo:
-
-The final full video is [here](https://github.com/DaveHJT/RayTracing-Project/blob/main/demo%20video.mp4).
 
 ### Reflection and Refraction
 
