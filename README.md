@@ -19,6 +19,7 @@ make
 ## Manual:
 1. This program is based on the A4 framework so it runs the same as A4. After activation, the frames are generated in ./render folder.
 
+## Image Demo:
 
 ### Reflection and Refraction
 
