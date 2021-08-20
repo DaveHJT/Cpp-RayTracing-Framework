@@ -3,7 +3,7 @@ A raytracing framework written in C++, implemented reflection; refraction; textu
 
 ## Video Demo:
 
-The full video demo is [here](https://github.com/DaveHJT/RayTracing-Project/blob/main/demo%20video.mp4).
+Please watch the full video demo [here](https://github.com/DaveHJT/RayTracing-Project/blob/main/demo%20video.mp4).
 
 ## Document:
 Please see the [document](https://github.com/DaveHJT/RayTracing-Project/blob/main/document.pdf) for details.
