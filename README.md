@@ -1,4 +1,4 @@
-# RayTracing-Project
+# C++ RayTracing Framework
 A raytracing framework written in C++, implemented reflection; refraction; texture mapping; mesh model; 360 background; motion blur, defocus blur (depth of field).
 
 ## Video Demo:
