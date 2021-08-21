@@ -1,11 +1,11 @@
 # C++ RayTracing Framework
 A raytracing framework written in C++, implemented reflection; refraction; texture mapping; mesh model; 360 background; motion blur, defocus blur (depth of field).
 
-The initial state of the scene including the positions and transformations for objects, lights and camera; the colors, textures, and coefficients of materials are read from "raytracing-framework/Asset/video.lua".
+The initial state of the scene including the positions and transformations for objects, lights and camera; colors, textures, and coefficients of materials are read from "raytracing-framework/Asset/video.lua".
 
-A camera path system is impletemted: In A4.cpp camera states can be created by setting the duration and camera trasformation at the state.
+A camera path system is implemented: In A4.cpp camera states can be created by setting the duration and camera trasformation at the state.
 
-A basic physics engine that can calculate the kinetics of billiard balls, and simulate perfect elastic collisions.
+A basic physics engine is implemented to calculate the kinetics of billiard balls, and simulate perfect elastic collisions.
 
 ## Video Demo:
 
