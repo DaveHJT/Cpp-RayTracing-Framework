@@ -153,10 +153,7 @@ bool Image::loadPng(const std::string & filename) {
   				<< std::endl;
   	}
     m_data = new double[m_width * m_height * m_colorComponents];
-    // for (uint y(0); y < m_width * m_height * m_colorComponents; y++) {
-    //   cout << (double)image[y] << " ";
-    // }
-    // cout << endl;
+
     double color;
   	for (uint y(0); y < m_height; y++) {
   		for (uint x(0); x < m_width; x++) {
@@ -164,16 +161,12 @@ bool Image::loadPng(const std::string & filename) {
 
   				color = (double) image[(m_colorComponents + 1) * (m_width * y + x) + i] / 255;
           color = clamp(color, 0.0, 1.0);
-          // cout << color << " ";
           m_data[m_colorComponents * (m_width * y + x) + i] = (double) color;
 
   			}
         int idx = m_colorComponents * (m_width * y + x);
         vec3 color2 = vec3((float)m_data[idx], (float)m_data[idx + 1], (float)m_data[idx + 2]);
-        // cout << "c2: " << to_string(color2) << endl;
-        // cout << to_string(getColor(x, y)) << endl;
   		}
-      // cout << endl;
   	}
 
   	return true;

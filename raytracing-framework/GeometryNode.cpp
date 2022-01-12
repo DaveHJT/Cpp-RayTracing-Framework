@@ -48,60 +48,26 @@ void GeometryNode::applyTrans(mat4 transform) {
 		child->applyTrans(transform);
 	}
 }
-// Intersection GeometryNode::intersect(Ray ray) {
-// 	// Ray transRay;
-// 	//
-// 	// transRay.source = transferVec(invtrans, ray.source);
-// 	// transRay.direction = normalize(transferVec(invtrans, ray.source + ray.direction) - transferVec(invtrans, ray.source));
-// 	// cout << m_name << " "  << this->children.size() << " ";
-// 	Intersection nearestInter = Intersection();
-// 	Intersection inter = this->m_primitive->intersect(ray);
-// 	float limit = numeric_limits<float>::max();
-// 	//cout << m_name << " " << inter.hit << inter.t << endl;
-// 	if (inter.hit && inter.t > 0.01) {
-// 		inter.mat = dynamic_cast<PhongMaterial*>(this->m_material);
-// 		nearestInter = inter;
-// 		limit = inter.t;
-// 		// cout << m_name << " " << inter.hit << endl;
-// 	}
-//
-// 	for (SceneNode * child : this->children) {
-// 		Intersection childInter = child->intersect(ray);
-// 		if (childInter.hit && childInter.t > TMIN && childInter.t < limit) {
-// 			nearestInter = childInter;
-// 			limit = childInter.t;
-// 			// cout << m_name << " " << childInter.hit << endl;
-// 		}
-// 	}
-// 	// cout << endl;
-// 	// nearestInter.position = transferVec(trans, transRay.source + nearestInter.t * transRay.direction);
-// 	// nearestInter.t = distance(nearestInter.position, ray.source);
-// 	// nearestInter.normal = normalize(transferVec(transpose(invtrans), nearestInter.normal));
-// 	return nearestInter;
-// }
 
 Intersection GeometryNode::intersect(Ray ray) {
 	// motion blur
 	vec3 offset = ray.time * velocity;
 	ray.source -= offset;
-	// if (offset != vec3(0)) cout << m_name << " " << to_string(offset) << endl;
-	// if (ray.time != 0) cout << m_name << " time: " << ray.time << endl;
 
 	Ray transRay;
   transRay.time = ray.time;
 	transRay.source = transferVec(invtrans, ray.source);
 	transRay.direction = normalize(transferVec(invtrans, ray.source + ray.direction) - transferVec(invtrans, ray.source));
-	// cout << m_name << " "  << this->children.size() << " ";
+
 	Intersection nearestInter = Intersection();
 	Intersection inter = this->m_primitive->intersect(transRay);
 	float limit = numeric_limits<float>::max();
-	//cout << m_name << " " << inter.hit << inter.t << endl;
+
 	if (inter.hit && inter.t > TMIN) {
 		if (inter.mat == nullptr) inter.mat = dynamic_cast<PhongMaterial*>(this->m_material);
 
 		nearestInter = inter;
 		limit = inter.t;
-		// cout << m_name << " " << inter.hit << endl;
 	}
 
 	for (SceneNode * child : this->children) {
@@ -109,10 +75,8 @@ Intersection GeometryNode::intersect(Ray ray) {
 		if (childInter.hit && childInter.t > TMIN && childInter.t < limit) {
 			nearestInter = childInter;
 			limit = childInter.t;
-			// cout << m_name << " " << childInter.hit << endl;
 		}
 	}
-	// cout << endl;
 	nearestInter.normal = normalize(transferVec(trans, nearestInter.normal + nearestInter.position) - transferVec(trans, nearestInter.position));
 	nearestInter.position = transferVec(trans, nearestInter.position);
 	nearestInter.t = distance(nearestInter.position, ray.source);

@@ -18,10 +18,7 @@ Intersection traingleIntersect(Ray ray, vec3 P0, vec3 P1, vec3 P2, float limit) 
     vec3 b = ray.direction;
 		vec3 B1 = P1 - P0;
 		vec3 B2 = P2 - P0;
-		// cout << "mesh0" << endl;
-		// cout << "a: " << a << endl;
-		// cout << "b: " << b << endl;
-		// cout << "B1: " << b << endl;
+
 		mat3 M = {B1, B2, -b};
 		mat3 M1 = {a - P0, B2, -b};
 		mat3 M2 = {B1, a - P0, -b};
@@ -31,13 +28,11 @@ Intersection traingleIntersect(Ray ray, vec3 P0, vec3 P1, vec3 P2, float limit) 
 		float D1 = determinant(M1);
 		float D2 = determinant(M2);
 		float D3 = determinant(M3);
-		// cout << "mesh1" << endl;
 		if (D == 0) return inter;
 		float beta = D1 / D;
 		float gamma = D2 / D;
 		float t = D3 / D;
-		// cout << "mesh2" << endl;
-		// cout << beta << endl;
+
 	if(t < limit && beta >= 0 && gamma >= 0 && beta + gamma <= 1){
 		inter.hit = true;
 		inter.t = t;
@@ -90,38 +85,9 @@ Intersection Mesh::intersect(Ray ray) {
 		}
 		inter.v = ratio(inter.position.y - min.y,  lenY);
 	}
-	// cout << inter.u << " " << inter.v << endl;
 	return inter;
 }
-// vec3 transferVec(mat4 trans, vec3 vector) {
-// 	return vec3(trans * vec4(vector, 1.0f));
-// }
-// Intersection Mesh::intersect(Ray ray) {
-// 	Ray transRay;
-//
-// 	transRay.source = transferVec(invtrans, ray.source);
-// 	transRay.direction = normalize(transferVec(invtrans, ray.source + ray.direction) - transferVec(invtrans, ray.source));
-// 	cout << *this << endl;
-// 	vector<vec3> vertices = m_vertices;
-// 	vector<Triangle> faces = m_faces;
-// 	float limit = numeric_limits<float>::max();
-// 	Intersection inter = Intersection();
-// 	// cout << "mesh" << endl;
-// 	for (Triangle triangle : faces) {
-// 		Intersection newInter = traingleIntersect(transRay, vertices[triangle.v1], vertices[triangle.v2], vertices[triangle.v3], limit);
-// 		if (newInter.hit) {
-// 			limit = newInter.t;
-// 			inter = newInter;
-// 		}
-// 	}
-//
-// 	inter.position = transferVec(trans, transRay.source + inter.t * transRay.direction);
-// 	inter.t = distance(inter.position, ray.source);
-// 	inter.normal = normalize(transferVec(transpose(invtrans), inter.normal));
-// 	return inter;
-//
-// 	return inter;
-// }
+
 
 void Mesh::applyTrans(glm::mat4 trans) {
 	this->trans *= trans;
@@ -168,8 +134,6 @@ Mesh::Mesh( const string& fname )
 
 	mat = new PhongMaterial(vec3(0.9, 0.9, 0.9), vec3(0.9, 0.9, 0.9), 100, 1.0, 0, "");
 	boundingV = new NonhierSphere(pos, radius);
-
-	// cout << "mesh: " << fname << *this << endl;
 }
 
 ostream& operator<<(ostream& out, const Mesh& mesh)
@@ -177,9 +141,6 @@ ostream& operator<<(ostream& out, const Mesh& mesh)
   out << "mesh {";
 	out << "nofverts: " << mesh.m_vertices.size();
 	out << " noffaces: " << mesh.m_vertices.size();
-  // for( size_t idx = 0; idx < mesh.m_vertices.size(); ++idx ) {
-  // 	out << to_string( mesh.m_vertices[idx] );
-	// }
 	out << to_string( mesh.m_vertices[0] );
 	out << to_string( mesh.trans );
   out << "}";
